@@ -13,7 +13,6 @@
         }
 
         body {
-            /* A good-looking, modern dark gradient background */
             background: linear-gradient(135deg, #0f172a, #1e293b);
             color: #e2e8f0;
             height: 100vh;
@@ -22,7 +21,6 @@
             overflow: hidden;
         }
 
-        /* Top Navigation / Toolbar */
         header {
             background: rgba(15, 23, 42, 0.9);
             padding: 15px 20px;
@@ -87,7 +85,6 @@
             background: #f87171;
         }
 
-        /* Chat Display Area */
         #chat-container {
             flex: 1;
             padding: 20px;
@@ -125,7 +122,6 @@
             border: 1px solid #475569;
         }
 
-        /* Input Area at the bottom */
         .input-area {
             padding: 20px;
             background: rgba(15, 23, 42, 0.9);
@@ -198,7 +194,7 @@
     <div id="chat-container">
         <!-- Initial Greeting -->
         <div class="message msg-ai">
-            Hello! I am a simulated AI. Ask me anything, or try using the microphone!
+            Hello! I am Ahmad AI. Try saying "hey", ask me "1+1", or tell me to "tell a joke"!
         </div>
     </div>
 
@@ -208,13 +204,13 @@
         <button class="send-btn" onclick="sendMessage()">Send</button>
     </div>
 
+    <!-- THIS IS THE SCRIPT SECTION -->
     <script>
         const chatContainer = document.getElementById("chat-container");
         const messageInput = document.getElementById("messageInput");
         const searchInput = document.getElementById("searchInput");
         const micBtn = document.getElementById("micBtn");
 
-        // Speech Recognition Setup (Works in Chrome/Edge)
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
         let isListening = false;
@@ -228,7 +224,7 @@
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
                 messageInput.value = transcript;
-                sendMessage(); // Auto-send when voice is captured
+                sendMessage(); 
             };
 
             recognition.onend = () => {
@@ -236,7 +232,7 @@
                 micBtn.classList.remove("listening");
             };
         } else {
-            micBtn.style.display = "none"; // Hide mic if browser doesn't support it
+            micBtn.style.display = "none"; 
         }
 
         function toggleMic() {
@@ -251,24 +247,56 @@
             }
         }
 
-        function sendMessage() {
+        // --- NEW AI BRAIN LOGIC ---
+        async function sendMessage() {
             const text = messageInput.value.trim();
             if (text === "") return;
 
-            // 1. Add User Message
+            // 1. Show your message
             addMessageToDOM(text, "msg-user");
             messageInput.value = "";
-
-            // 2. Clear any active search so new messages are visible
             searchInput.value = "";
             searchChat();
 
-            // 3. Simulate AI Thinking and Replying
-            setTimeout(() => {
-                const botResponse = "You just said: '" + text + "'. (I am currently a UI simulation. Connect me to a backend API to make me smart!)";
+            // 2. The AI's "Brain"
+            setTimeout(async () => {
+                let botResponse = "";
+                // Make the text lowercase and remove spaces so it's easier for the bot to understand
+                let lowerText = text.toLowerCase().replace(/\s/g, ''); 
+
+                // Rule 1: Greetings
+                if (lowerText.includes("hey") || lowerText.includes("hello") || lowerText.includes("hi")) {
+                    botResponse = "Hello Ahmad! How are you doing today?";
+                }
+                // Rule 2: Basic Math (like your 1plus1 example)
+                else if (lowerText.includes("1plus1") || lowerText.includes("1+1")) {
+                    botResponse = "That's easy! 1 + 1 equals 2.";
+                }
+                // Rule 3: Real Internet API Connection (Tells a joke)
+                else if (lowerText.includes("joke")) {
+                    botResponse = "Let me think of a good one... 🤔";
+                    addMessageToDOM(botResponse, "msg-ai"); // Send placeholder
+                    
+                    try {
+                        // This fetches a real joke from a free internet database!
+                        let response = await fetch("https://v2.jokeapi.dev/joke/Any?safe-mode&type=single");
+                        let data = await response.json();
+                        botResponse = data.joke; 
+                    } catch (error) {
+                        botResponse = "Oops, my internet connection to the joke database failed!";
+                    }
+                }
+                // Rule 4: Default Fallback if it doesn't know the answer
+                else {
+                    botResponse = "I don't know how to respond to that yet! Try saying 'hello', asking '1 + 1', or tell me to 'tell a joke'.";
+                }
+
+                // 3. Show the AI's response
                 addMessageToDOM(botResponse, "msg-ai");
-            }, 1000);
+
+            }, 600); // Wait 0.6 seconds to make it feel like it's thinking
         }
+        // -----------------------------
 
         function addMessageToDOM(text, className) {
             const msgDiv = document.createElement("div");
@@ -276,7 +304,6 @@
             msgDiv.innerText = text;
             chatContainer.appendChild(msgDiv);
             
-            // Scroll to the bottom
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
@@ -286,7 +313,6 @@
             }
         }
 
-        // Feature: Add Chat (Clears screen for a fresh start)
         function newChat() {
             chatContainer.innerHTML = `
                 <div class="message msg-ai">
@@ -296,14 +322,12 @@
             searchInput.value = "";
         }
 
-        // Feature: Remove Chat (Deletes everything)
         function removeChat() {
             if(confirm("Are you sure you want to delete all messages?")) {
                 chatContainer.innerHTML = "";
             }
         }
 
-        // Feature: Search Chat (Filters visible messages)
         function searchChat() {
             const filter = searchInput.value.toLowerCase();
             const messages = chatContainer.getElementsByClassName("message");
